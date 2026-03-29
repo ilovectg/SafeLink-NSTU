@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeLink - Proctorial Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .stat-card.pending .number { color: #f59e0b; }
+        .stat-card.accepted .number { color: #10b981; }
+        .stat-card.rejected .number { color: #ef4444; }
+        .stat-card.total .number { color: #667eea; }
+
+        .alerts-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .alerts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .alerts-header h2 {
+            color: #333;
+            font-size: 20px;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: #5568d3;
+        }
+
+        .alert-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .alert-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .alert-card.pending {
+            border-left: 4px solid #f59e0b;
+            background: #fffbeb;
+        }
+
+        .alert-card.accepted {
+            border-left: 4px solid #10b981;
+            background: #f0fdf4;
+        }
+
+        .alert-card.rejected {
+            border-left: 4px solid #ef4444;
+            background: #fef2f2;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .student-info h3 {
+            color: #111;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .student-info p {
+            color: #666;
+            font-size: 14px;
+            margin: 3px 0;
+        }
+
+        .alert-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .alert-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .alert-status.accepted {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .alert-status.rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .alert-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-item .icon {
+            width: 35px;
+            height: 35px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .detail-item .text {
+            flex: 1;
+        }
+
+        .detail-item .label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        .detail-item .value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-accept {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #059669;
+        }
+
+        .btn-reject {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #dc2626;
+        }
+
+        .btn-map {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-map:hover {
+            background: #2563eb;
+        }
+
+        .btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .filter-tab.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ SafeLink Proctorial Dashboard</h1>
+            <p>Real-time student emergency alerts monitoring</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card pending">
+                <h3>Pending Alerts</h3>
+                <div class="number" id="pendingCount">0</div>
+            </div>
+            <div class="stat-card accepted">
+                <h3>Accepted</h3>
+                <div class="number" id="acceptedCount">0</div>
+            </div>
+            <div class="stat-card rejected">
+                <h3>Rejected</h3>
+                <div class="number" id="rejectedCount">0</div>
+            </div>
+            <div class="stat-card total">
+                <h3>Total Today</h3>
+                <div class="number" id="totalCount">0</div>
+            </div>
+        </div>
+
+        <div class="alerts-container">
+            <div class="alerts-header">
+                <h2>Emergency Alerts</h2>
+                <button class="refresh-btn" onclick="loadAlerts()">🔄 Refresh</button>
+            </div>
+
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterAlerts('all')">All</button>
+                <button class="filter-tab" onclick="filterAlerts('pending')">Pending</button>
+                <button class="filter-tab" onclick="filterAlerts('accepted')">Accepted</button>
+                <button class="filter-tab" onclick="filterAlerts('rejected')">Rejected</button>
+            </div>
+
+            <div id="alertsContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading alerts...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, query, orderBy, limit, onSnapshot, doc, updateDoc, serverTimestamp, connectFirestoreEmulator } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase config for SafeLink NSTU
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7qdmjhRBYUAZcqDBuKnTGFaJ3lcMb8ZU",
+            authDomain: "safe-93f85.firebaseapp.com",
+            projectId: "safe-93f85",
+            storageBucket: "safe-93f85.firebasestorage.app",
+            messagingSenderId: "297109326028",
+            appId: "1:297109326028:web:3cae9556f0f2f98ec6da69",
+            measurementId: "G-S45P7LZW2Y"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        // Only connect to emulator in development (localhost)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          connectFirestoreEmulator(db, 'localhost', 8080);
+        }
+
+        let currentFilter = 'all';
+        let allAlerts = [];
+
+        // Listen to real-time alerts
+        const q = query(
+            collection(db, 'proctorial_alerts'),
+            orderBy('receivedAt', 'desc'),
+            limit(50)
+        );
+
+        onSnapshot(q, (snapshot) => {
+            allAlerts = [];
+            snapshot.forEach((doc) => {
+                allAlerts.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            updateStats();
+            displayAlerts();
+        });
+
+        function updateStats() {
+            const pending = allAlerts.filter(a => a.status === 'pending').length;
+            const accepted = allAlerts.filter(a => a.status === 'accepted').length;
+            const rejected = allAlerts.filter(a => a.status === 'rejected').length;
+
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('acceptedCount').textContent = accepted;
+            document.getElementById('rejectedCount').textContent = rejected;
+            document.getElementById('totalCount').textContent = allAlerts.length;
+        }
+
+        window.filterAlerts = function(filter) {
+            currentFilter = filter;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            displayAlerts();
+        };
+
+        function displayAlerts() {
+            const container = document.getElementById('alertsContainer');
+            
+            let filteredAlerts = allAlerts;
+            if (currentFilter !== 'all') {
+                filteredAlerts = allAlerts.filter(a => a.status === currentFilter);
+            }
+
+            if (filteredAlerts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <h3>No alerts found</h3>
+                        <p>There are no ${currentFilter === 'all' ? '' : currentFilter} alerts at the moment.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredAlerts.map(alert => `
+                <div class="alert-card ${alert.status}">
+                    <div class="alert-header">
+                        <div class="student-info">
+                            <h3>${alert.studentName}</h3>
+                            <p>ID: ${alert.studentId}</p>
+                            <p>${alert.department} • ${alert.session}</p>
+                        </div>
+                        <span class="alert-status ${alert.status}">${alert.status}</span>
+                    </div>
+
+                    <div class="alert-details">
+                        <div class="detail-item">
+                            <div class="icon">📞</div>
+                            <div class="text">
+                                <div class="label">Phone</div>
+                                <div class="value">${alert.studentPhone}</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="icon">📧</div>
+                            <div class="text">
+                                <div class="label">Email</div>
+                                <div class="value">${alert.studentEmail}</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="icon">📍</div>
+                            <div class="text">
+                                <div class="label">Location</div>
+                                <div class="value">${alert.location || 'Unknown'}</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="icon">⏰</div>
+                            <div class="text">
+                                <div class="label">Time</div>
+                                <div class="value">${formatTime(alert.timestamp || alert.receivedAt)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${alert.status === 'pending' ? `
+                        <div class="alert-actions">
+                            <button class="btn btn-accept" onclick="acceptAlert('${alert.id}')">
+                                ✅ Accept & Respond
+                            </button>
+                            <button class="btn btn-reject" onclick="rejectAlert('${alert.id}')">
+                                ❌ Reject
+                            </button>
+                            <button class="btn btn-map" onclick="openMap(${alert.latitude}, ${alert.longitude})">
+                                🗺️ View on Map
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="alert-actions">
+                            <button class="btn btn-map" onclick="openMap(${alert.latitude}, ${alert.longitude})">
+                                🗺️ View on Map
+                            </button>
+                            ${alert.respondedByName ? `
+                                <span style="color: #666; font-size: 14px;">
+                                    Handled by: <strong>${alert.respondedByName}</strong>
+                                </span>
+                            ` : ''}
+                        </div>
+                    `}
+                </div>
+            `).join('');
+        }
+
+        window.acceptAlert = async function(alertId) {
+            const proctorName = prompt('Enter your name:');
+            if (!proctorName) return;
+
+            try {
+                await updateDoc(doc(db, 'proctorial_alerts', alertId), {
+                    status: 'accepted',
+                    respondedByName: proctorName,
+                    respondedAt: serverTimestamp()
+                });
+                alert('Alert accepted! Student will be notified.');
+            } catch (error) {
+                console.error('Error accepting alert:', error);
+                alert('Error accepting alert: ' + error.message);
+            }
+        };
+
+        window.rejectAlert = async function(alertId) {
+            const proctorName = prompt('Enter your name:');
+            if (!proctorName) return;
+
+            const reason = prompt('Reason for rejection:');
+            if (!reason) return;
+
+            try {
+                await updateDoc(doc(db, 'proctorial_alerts', alertId), {
+                    status: 'rejected',
+                    respondedByName: proctorName,
+                    respondedAt: serverTimestamp(),
+                    rejectionReason: reason
+                });
+                alert('Alert rejected.');
+            } catch (error) {
+                console.error('Error rejecting alert:', error);
+                alert('Error rejecting alert: ' + error.message);
+            }
+        };
+
+        window.openMap = function(lat, lon) {
+            window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank');
+        };
+
+        function formatTime(timestamp) {
+            if (!timestamp) return 'Unknown';
+            
+            let date;
+            if (timestamp.toDate) {
+                date = timestamp.toDate();
+            } else if (timestamp.seconds) {
+                date = new Date(timestamp.seconds * 1000);
+            } else {
+                date = new Date(timestamp);
+            }
+
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            
+            return date.toLocaleString();
+        }
+
+        window.loadAlerts = function() {
+            location.reload();
+        };
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            console.log('Auto-refreshing alerts...');
+        }, 30000);
+    </script>
+</body>
+</html>
