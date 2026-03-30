@@ -62,7 +62,7 @@ The system is built for real-time performance and future scalability.
 ### Clone and install Flutter dependencies
 
 ```bash
-git clone https://github.com/Jukta06/SafeLink-NSTU.git
+git clone https://github.com/ilovectg/SafeLink-NSTU.git
 cd SafeLink-NSTU
 flutter pub get
 ```
